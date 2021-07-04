@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/alexedwards/scs/v2"
-	"github.com/tbetcha/gotel/pkg/config"
-	"github.com/tbetcha/gotel/pkg/handlers"
-	"github.com/tbetcha/gotel/pkg/render"
+	"github.com/tbetcha/gotel/internal/config"
+	"github.com/tbetcha/gotel/internal/handlers"
+	"github.com/tbetcha/gotel/internal/render"
 	"log"
 	"net/http"
 	"time"
