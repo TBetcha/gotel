@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/tbetcha/gotel/internal/config"
 	"github.com/tbetcha/gotel/internal/handlers"
+	"github.com/tbetcha/gotel/internal/models"
 	"github.com/tbetcha/gotel/internal/render"
 	"log"
 	"net/http"
@@ -18,6 +20,7 @@ var session *scs.SessionManager
 
 func main() {
 
+ 	gob.Register(models.Reservation{})
 	app.InProduction = false
 
 	// change this to true when in prod
