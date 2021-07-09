@@ -5,6 +5,7 @@ import (
 	"github.com/tbetcha/gotel/internal/config"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 var app *config.AppConfig
@@ -26,3 +27,12 @@ func ServerError(w http.ResponseWriter, err error) {
 	http.Error(w,http.StatusText(http.StatusInternalServerError),http.StatusInternalServerError)
 
 }
+
+func ReturnFormattedDate(str string, w http.ResponseWriter) time.Time {
+	layout := "2006-01-02"
+	parsedDate, err := time.Parse(layout, str)
+		if err != nil{
+			ServerError(w, err)
+		}
+	return parsedDate
+	}

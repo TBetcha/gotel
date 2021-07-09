@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"github.com/tbetcha/gotel/internal/config"
+	"github.com/tbetcha/gotel/internal/driver"
 	"github.com/tbetcha/gotel/internal/handlers"
 	"github.com/tbetcha/gotel/internal/helpers"
 	"github.com/tbetcha/gotel/internal/models"
@@ -23,10 +24,12 @@ var infoLog *log.Logger
 var errorLog *log.Logger
 
 func main() {
-	err := run()
+	db,err := run()
 	if err != nil{
 		log.Fatal(err)
 	}
+	defer db.SQL.Close()
+
 	fmt.Println(fmt.Sprintf("starting app on  port %s", portNumber))
 
 	srv := &http.Server{
@@ -38,8 +41,11 @@ func main() {
 	log.Fatal(err)
 }
 
-func run() error {
+func run() (*driver.DB, error) {
 	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
 	// change this to true when in prod
 	app.InProduction = false
 
@@ -57,19 +63,26 @@ func run() error {
 
 	app.Session = session
 
+	// connect to Db
+	log.Println("connecting to db")
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=hotels user=tmb password=")
+	if err != nil{
+		log.Fatal("cannot connect to db, oh nooooo")
+	}
+	log.Println("connected to db bro")
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("cannot create template cache")
-		return err
+		return nil,err
 	}
 
 	app.TemplateCache = tc
 
 	app.UseCache = false
-	repo := handlers.NewRepo(&app)
+	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
-	render.NewTemplates(&app)
+	render.NewRenderer(&app)
 	helpers.NewHelpers(&app)
 
-	return nil
+	return db, nil
 }
