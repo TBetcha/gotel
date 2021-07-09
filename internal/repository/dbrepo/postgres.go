@@ -19,7 +19,7 @@ func (m *postgresDBRepo) InsertReservation(res models.Reservation) error {
 	}
 	defer cancel()
 
-	stmt := `insert into reservations (first_name, last_name, email, phone, start_date
+	stmt := `insert into reservations (first_name, last_name, email, phone, start_date,
 					end_date, room_id, created_at, updated_at)
 					values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
@@ -46,4 +46,5 @@ func (m *postgresDBRepo) InsertReservation(res models.Reservation) error {
 	}
 	log.Fatal("transaction messed up during commit", err)
 	return err
+return nil
 }
