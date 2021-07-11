@@ -99,10 +99,10 @@ ALTER SEQUENCE public.restrictions_id_seq OWNED BY public.restrictions.id;
 
 
 --
--- Name: room-restrictions; Type: TABLE; Schema: public; Owner: tmb
+-- Name: room_restrictions; Type: TABLE; Schema: public; Owner: tmb
 --
 
-CREATE TABLE public."room-restrictions" (
+CREATE TABLE public.room_restrictions (
     id integer NOT NULL,
     start_date date NOT NULL,
     end_date date NOT NULL,
@@ -114,7 +114,7 @@ CREATE TABLE public."room-restrictions" (
 );
 
 
-ALTER TABLE public."room-restrictions" OWNER TO tmb;
+ALTER TABLE public.room_restrictions OWNER TO tmb;
 
 --
 -- Name: room-restrictions_id_seq; Type: SEQUENCE; Schema: public; Owner: tmb
@@ -135,7 +135,7 @@ ALTER TABLE public."room-restrictions_id_seq" OWNER TO tmb;
 -- Name: room-restrictions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: tmb
 --
 
-ALTER SEQUENCE public."room-restrictions_id_seq" OWNED BY public."room-restrictions".id;
+ALTER SEQUENCE public."room-restrictions_id_seq" OWNED BY public.room_restrictions.id;
 
 
 --
@@ -240,10 +240,10 @@ ALTER TABLE ONLY public.restrictions ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
--- Name: room-restrictions id; Type: DEFAULT; Schema: public; Owner: tmb
+-- Name: room_restrictions id; Type: DEFAULT; Schema: public; Owner: tmb
 --
 
-ALTER TABLE ONLY public."room-restrictions" ALTER COLUMN id SET DEFAULT nextval('public."room-restrictions_id_seq"'::regclass);
+ALTER TABLE ONLY public.room_restrictions ALTER COLUMN id SET DEFAULT nextval('public."room-restrictions_id_seq"'::regclass);
 
 
 --
@@ -277,10 +277,10 @@ ALTER TABLE ONLY public.restrictions
 
 
 --
--- Name: room-restrictions room-restrictions_pkey; Type: CONSTRAINT; Schema: public; Owner: tmb
+-- Name: room_restrictions room-restrictions_pkey; Type: CONSTRAINT; Schema: public; Owner: tmb
 --
 
-ALTER TABLE ONLY public."room-restrictions"
+ALTER TABLE ONLY public.room_restrictions
     ADD CONSTRAINT "room-restrictions_pkey" PRIMARY KEY (id);
 
 
@@ -318,21 +318,21 @@ CREATE INDEX reservations_last_name_idx ON public.reservations USING btree (last
 -- Name: room-restrictions_reservation_id_idx; Type: INDEX; Schema: public; Owner: tmb
 --
 
-CREATE INDEX "room-restrictions_reservation_id_idx" ON public."room-restrictions" USING btree (reservation_id);
+CREATE INDEX "room-restrictions_reservation_id_idx" ON public.room_restrictions USING btree (reservation_id);
 
 
 --
 -- Name: room-restrictions_room_id_idx; Type: INDEX; Schema: public; Owner: tmb
 --
 
-CREATE INDEX "room-restrictions_room_id_idx" ON public."room-restrictions" USING btree (room_id);
+CREATE INDEX "room-restrictions_room_id_idx" ON public.room_restrictions USING btree (room_id);
 
 
 --
 -- Name: room-restrictions_start_date_end_date_idx; Type: INDEX; Schema: public; Owner: tmb
 --
 
-CREATE INDEX "room-restrictions_start_date_end_date_idx" ON public."room-restrictions" USING btree (start_date, end_date);
+CREATE INDEX "room-restrictions_start_date_end_date_idx" ON public.room_restrictions USING btree (start_date, end_date);
 
 
 --
@@ -358,27 +358,27 @@ ALTER TABLE ONLY public.reservations
 
 
 --
--- Name: room-restrictions room-restrictions_reservations_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: tmb
+-- Name: room_restrictions room-restrictions_reservations_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: tmb
 --
 
-ALTER TABLE ONLY public."room-restrictions"
+ALTER TABLE ONLY public.room_restrictions
     ADD CONSTRAINT "room-restrictions_reservations_id_fk" FOREIGN KEY (reservation_id) REFERENCES public.reservations(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: room-restrictions room-restrictions_restrictions_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: tmb
+-- Name: room_restrictions room-restrictions_rooms_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: tmb
 --
 
-ALTER TABLE ONLY public."room-restrictions"
-    ADD CONSTRAINT "room-restrictions_restrictions_id_fk" FOREIGN KEY (restriction_id) REFERENCES public.restrictions(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: room-restrictions room-restrictions_rooms_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: tmb
---
-
-ALTER TABLE ONLY public."room-restrictions"
+ALTER TABLE ONLY public.room_restrictions
     ADD CONSTRAINT "room-restrictions_rooms_id_fk" FOREIGN KEY (room_id) REFERENCES public.rooms(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: room_restrictions room_restrictions_reservations_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: tmb
+--
+
+ALTER TABLE ONLY public.room_restrictions
+    ADD CONSTRAINT room_restrictions_reservations_id_fk FOREIGN KEY (reservation_id) REFERENCES public.reservations(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

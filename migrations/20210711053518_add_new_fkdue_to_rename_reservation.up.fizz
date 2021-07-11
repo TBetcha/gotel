@@ -1,0 +1,6 @@
+drop_foreign_key("room_restrictions", "room-restrictions_restrictions_id_fk", {"if_exists": true})
+
+add_foreign_key("room_restrictions","reservation_id",{"reservations": ["id"]}, {
+  "on_delete": "cascade",
+  "on_update": "cascade",
+})
