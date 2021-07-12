@@ -2,6 +2,7 @@ package dbrepo
 
 import (
 	"database/sql"
+
 	"github.com/tbetcha/gotel/internal/config"
 	"github.com/tbetcha/gotel/internal/repository"
 )

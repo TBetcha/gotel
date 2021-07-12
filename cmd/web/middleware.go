@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/justinas/nosurf"
 	"net/http"
+
+	"github.com/justinas/nosurf"
 )
 
 // basic middleware for chi I use it the same way  "mux.use(middleware name)
@@ -28,7 +29,7 @@ func NoSurf(next http.Handler) http.Handler {
 	return csrfHandler
 }
 
-// SessionLoad loads and saves the session on ev                                                                                                                                                                                                                                                             lllllllllllllllllllllllllllllllllllllllrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+// SessionLoad loads and saves the session on ev                                                                                                                     
 func SessionLoad(next http.Handler) http.Handler {
 	return session.LoadAndSave(next)
 }

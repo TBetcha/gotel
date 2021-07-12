@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"github.com/tbetcha/gotel/internal/models"
 	"time"
+
+	"github.com/tbetcha/gotel/internal/models"
 )
 
 type DatabaseRepo interface {
@@ -10,5 +11,6 @@ type DatabaseRepo interface {
 
 	InsertReservation(res models.Reservation) (int,error)
   InsertRoomRestriction(r models.RoomRestriction) error
-  searchAvailabilityyDates(start, end time.Time)(bool,error)
+  SearchAvailabilityByDatesByRoomId(start, end time.Time,roomId int)(bool,error)
+  SeachAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
 }
