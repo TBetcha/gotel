@@ -3,6 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/tbetcha/gotel/internal/config"
 	"github.com/tbetcha/gotel/internal/driver"
 	"github.com/tbetcha/gotel/internal/forms"
@@ -11,10 +16,6 @@ import (
 	"github.com/tbetcha/gotel/internal/render"
 	"github.com/tbetcha/gotel/internal/repository"
 	"github.com/tbetcha/gotel/internal/repository/dbrepo"
-	"log"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 // Repo the repository used by the handlers
@@ -70,6 +71,31 @@ func (m *Repository) Availability(w http.ResponseWriter, r *http.Request) {
 func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 	start := r.Form.Get("start")
 	end := r.Form.Get("end")
+
+	//	20202-01-01 -- 1/-2 2:04:05PM '06 -0700
+	startD := r.Form.Get("start")
+	endD := r.Form.Get("end")
+	layout := "2006-01-02"
+
+	startDate, err := time.Parse(layout, startD)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	endDate, err := time.Parse(layout, endD)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	rooms, err := m.DB.SeachAvailabilityForAllRooms(startDate, endDate)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	for _, i := range rooms {
+		m.App.InfoLog.Println("Room: ", i.ID, i.RoomName)
+	}
+
 	w.Write([]byte(fmt.Sprintf("start date is %s and end date is %s", start, end)))
 }
 
@@ -118,19 +144,19 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-//	20202-01-01 -- 1/-2 2:04:05PM '06 -0700
+	//	20202-01-01 -- 1/-2 2:04:05PM '06 -0700
 	startD := r.Form.Get("start_date")
 	endD := r.Form.Get("end_date")
 	layout := "2006-01-02"
-	startDate, err := time.Parse(layout,startD)
+	startDate, err := time.Parse(layout, startD)
 	if err != nil {
 		helpers.ServerError(w, err)
 	}
 
-	endDate, err := time.Parse(layout,endD)
-		if err != nil {
-			helpers.ServerError(w, err)
-		}
+	endDate, err := time.Parse(layout, endD)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
 
 	roomId, err := strconv.Atoi(r.Form.Get("room_id"))
 	if err != nil {
@@ -179,7 +205,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = m.DB.InsertRoomRestriction(restriction)
-	if err != nil{
+	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
