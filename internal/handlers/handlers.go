@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -69,8 +68,8 @@ func (m *Repository) Availability(w http.ResponseWriter, r *http.Request) {
 
 // PostAvailability handles post request for availability
 func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
-	start := r.Form.Get("start")
-	end := r.Form.Get("end")
+	// start := r.Form.Get("start")
+	// end := r.Form.Get("end")
 
 	//	20202-01-01 -- 1/-2 2:04:05PM '06 -0700
 	startD := r.Form.Get("start")
@@ -92,11 +91,31 @@ func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 		helpers.ServerError(w, err)
 		return
 	}
-	for _, i := range rooms {
-		m.App.InfoLog.Println("Room: ", i.ID, i.RoomName)
-	}
 
-	w.Write([]byte(fmt.Sprintf("start date is %s and end date is %s", start, end)))
+	if len(rooms) == 0 {
+		//no avail
+		m.App.Session.Put(r.Context(), "error", "No available rooms")
+		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
+		return
+	}
+	//
+	data := make(map[string]interface{})
+	data["rooms"] = rooms
+
+	res := models.Reservation{
+		StartDate: startDate,
+		EndDate:   endDate,
+		RoomId:    0,
+	}
+	
+	m.App.Session.Put(r.Context(),"reservation", res)
+	// for _, i := range rooms {
+	// 	m.App.InfoLog.Println("Room: ", i.ID, i.RoomName)
+	// }
+
+	render.Template(w, r, "choose-room.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
 }
 
 type jsonResponse struct {
@@ -225,6 +244,7 @@ func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) 
 	m.App.Session.Remove(r.Context(), "reserservation")
 	data := make(map[string]interface{})
 	data["reservation"] = reservation
+
 	render.Template(w, r, "reservation-summary.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
