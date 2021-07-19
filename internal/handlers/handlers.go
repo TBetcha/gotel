@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/tbetcha/gotel/internal/config"
 	"github.com/tbetcha/gotel/internal/driver"
@@ -105,14 +108,10 @@ func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 	res := models.Reservation{
 		StartDate: startDate,
 		EndDate:   endDate,
-		RoomId:    0,
+		//		RoomId:    0,
 	}
-	
-	m.App.Session.Put(r.Context(),"reservation", res)
-	// for _, i := range rooms {
-	// 	m.App.InfoLog.Println("Room: ", i.ID, i.RoomName)
-	// }
 
+	m.App.Session.Put(r.Context(), "reservation", res)
 	render.Template(w, r, "choose-room.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
@@ -145,13 +144,26 @@ func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 
 // Reservation renders the make a reservation page and displays form
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	var emptyReservation models.Reservation
+	res, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		helpers.ServerError(w, errors.New("cannot get reservation from session"))
+		return
+	}
+
+	sd := res.StartDate.Format("2006-01-02")
+	ed := res.EndDate.Format("2006-01-02")
+
+	stringMap := make(map[string]string)
+	stringMap["start_date"] = sd
+	stringMap["end_date"] = ed
+
 	data := make(map[string]interface{})
-	data["reservation"] = emptyReservation
+	data["reservation"] = res
 
 	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
-		Form: forms.New(nil),
-		Data: data,
+		Form:      forms.New(nil),
+		Data:      data,
+		StringMap: stringMap,
 	})
 }
 
@@ -163,7 +175,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//	20202-01-01 -- 1/-2 2:04:05PM '06 -0700
+	//	Time format for golang to be able to convert: 20202-01-01 -- 1/-2 2:04:05PM '06 -0700
 	startD := r.Form.Get("start_date")
 	endD := r.Form.Get("end_date")
 	layout := "2006-01-02"
@@ -241,11 +253,28 @@ func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	m.App.Session.Remove(r.Context(), "reserservation")
+	m.App.Session.Remove(r.Context(), "reservation")
 	data := make(map[string]interface{})
 	data["reservation"] = reservation
 
 	render.Template(w, r, "reservation-summary.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
+}
+
+func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
+	roomId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	res, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		m.App.ErrorLog.Println("Can't  get reservation ")
+		return
+	}
+	res.RoomId = roomId
+	m.App.Session.Put(r.Context(), "reservation", res)
+	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
 }
